@@ -96,8 +96,7 @@ public class ProductController {
     if (dbCon == null) {
       dbCon = new DatabaseController();
     }
-
-    // TODO: Use caching layer.
+    //TODO: Use cashing layer : FIX
     String sql = "SELECT * FROM product";
 
     ResultSet rs = dbCon.query(sql);

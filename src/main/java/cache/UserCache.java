@@ -10,6 +10,7 @@ import model.Product;
 import model.User;
 import utils.Config;
 
+// TODO: Build this cache and use it : FIX
 public class UserCache {
 
     // List of users
