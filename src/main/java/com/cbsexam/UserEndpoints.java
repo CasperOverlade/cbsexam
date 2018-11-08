@@ -4,11 +4,7 @@ import cache.UserCache;
 import com.google.gson.Gson;
 import controllers.UserController;
 import java.util.ArrayList;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import model.User;
@@ -19,6 +15,7 @@ import utils.Log;
 public class UserEndpoints {
 
   private static UserCache userCache = new UserCache();
+  public static boolean forceUpdate=true;
 
   /**
    * @param idUser
@@ -52,7 +49,7 @@ public class UserEndpoints {
     Log.writeLog(this.getClass().getName(), this, "Get all users", 0);
 
     // Get a list of users
-    ArrayList<User> users = userCache.getUsers(false);
+    ArrayList<User> users = userCache.getUsers(forceUpdate);
 
     // TODO: Add Encryption to JSON : FIX
     // Transfer users to json in order to return it to the user
@@ -105,10 +102,32 @@ public class UserEndpoints {
     return Response.status(400).entity("Endpoint not implemented yet").build();
   }
 
-  // TODO: Make the system able to update users
-  public Response updateUser(String x) {
+  // TODO: Make the system able to update users : FIX
+  @PUT
+  @Path("/{idUser}")
+  @Consumes(MediaType.APPLICATION_JSON)
+  //Funder over hvorfor man ikke behøver en @PathParam ("idUser")/
+  public Response updateUser(String body) {
 
-    // Return a response with status 200 and JSON as type
-    return Response.status(400).entity("Endpoint not implemented yet").build();
+      // Read the json from body and transfer it to a user class
+      User readUserUpdate = new Gson().fromJson(body, User.class);
+
+      // Use the controller to update the user
+      User updateUser = UserController.updateUser(readUserUpdate);
+
+      // Get the user back with the added ID and return it to the user
+      String json = new Gson().toJson(updateUser);
+
+      // Return the data to the user
+      if (updateUser != null) {
+          this.forceUpdate = true;
+
+          // Return a response with status 200 and JSON as type
+          return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(json).build();
+      } else {
+          // Return a response with status 200 and JSON as type
+          return Response.status(400).entity("Endpoint not updated yet").build();
+      }
   }
 }
+
