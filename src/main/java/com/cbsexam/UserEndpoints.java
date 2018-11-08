@@ -36,8 +36,12 @@ public class UserEndpoints {
       json = Encryption.encryptDecryptXOR(json);
 
     // Return the user with the status code 200
-    // TODO: What should happen if something breaks down?
-    return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(json).build();
+    // TODO: What should happen if something breaks down? : FIX
+      if (user != null) {
+          return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(json).build();
+      } else {
+          return Response.status(400).entity("this user has not yet been created :-(").build();
+      }
   }
 
   /** @return Responses */
@@ -95,11 +99,26 @@ public class UserEndpoints {
     return Response.status(400).entity("Endpoint not implemented yet").build();
   }
 
-  // TODO: Make the system able to delete users
-  public Response deleteUser(String x) {
+  // TODO: Make the system able to delete users : FIX
+  @DELETE
+  @Path("/{idUser}")
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response deleteUser(@PathParam("idUser") int idUser) {
 
-    // Return a response with status 200 and JSON as type
-    return Response.status(400).entity("Endpoint not implemented yet").build();
+      // Write to log that we are here
+      Log.writeLog(this.getClass().getName(), this, "Deleting a user", 0);
+
+      // Use the ID to delete the user from the database via controller.
+      boolean deleted = UserController.deleteUser(idUser);
+
+      if (deleted) {
+          this.forceUpdate = true;
+          // Return a response with status 200 and JSON as type
+          return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity("Bruger slettet").build();
+      }else {
+          // Return a response with status 200 and JSON as type
+          return Response.status(400).entity("Could not delete user").build();
+      }
   }
 
   // TODO: Make the system able to update users : FIX
