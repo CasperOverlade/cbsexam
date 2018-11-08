@@ -19,6 +19,8 @@ public class OrderEndpoints {
 
   private static OrderCache orderCache = new OrderCache();
 
+  public static boolean forceUpdate = true;
+
   /**
    * @param idOrder
    * @return Responses
@@ -47,11 +49,13 @@ public class OrderEndpoints {
   public Response getOrders() {
 
     // Call our controller-layer in order to get the order from the DB
-    ArrayList<Order> orders = orderCache.getOrders(false);
+    ArrayList<Order> orders = orderCache.getOrders(forceUpdate);
 
     // TODO: Add Encryption to JSON : FIX
     // We convert the java object to json with GSON library imported in Maven
     String json = new Gson().toJson(orders);
+
+    this.forceUpdate = false;
 
       //adds encryption
       json = Encryption.encryptDecryptXOR(json);
@@ -76,6 +80,8 @@ public class OrderEndpoints {
 
     // Return the data to the user
     if (createdOrder != null) {
+
+      this.forceUpdate = true;
       // Return a response with status 200 and JSON as type
       return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(json).build();
     } else {
