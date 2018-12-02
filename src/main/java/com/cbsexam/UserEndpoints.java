@@ -96,7 +96,11 @@ public class UserEndpoints {
   @POST
   @Path("/login")
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response loginUser(String x) {
+  public Response loginUser(String loginUser) {
+
+      User user = new Gson().fromJson(loginUser, User.class);
+
+      User userToLogin = UserController.login(user);
 
     // Return a response with status 200 and JSON as type
     return Response.status(400).entity("Endpoint not implemented yet").build();

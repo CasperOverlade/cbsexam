@@ -173,4 +173,8 @@ public class UserController {
             return false;
         }
     }
+
+    public static User login(User user) {
+
+    }
 }
