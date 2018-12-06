@@ -167,9 +167,30 @@ public class OrderController {
       items.add(item);
     }
 
+    //Add line items to the order, commit and return the order
     order.setLineItems(items);
-
-    // Return order
+    dbCon.getConnection().commit();
     return order;
+
+    // adding nullpointerexception, since we are using getUser() and not createUser() - we want people to be
+    // logged in before they make an order. like Amazon or other sites.
+  } catch (SQLException | NullPointerException e) {
+    System.out.println(e.getMessage();
+    try {
+      //If the exception is catched, we roll back our statements to the database.
+      System.out.println("rolling back");
+      dbCon.getConnection().rollback();
+    } catch (SQLException ex) {
+      ex.printStackTrace();
+    }
   }
+    finally {
+    try {
+      //Sets autocommit to true.
+      dbCon.getConnection().setAutoCommit(true);
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+  }
+    return null;
 }
