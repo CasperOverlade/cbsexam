@@ -128,6 +128,9 @@ public class OrderController {
       dbCon = new DatabaseController();
     }
 
+    try { //We set the autocommit to false, making the way to use transactions
+          dbCon.getConnection().setAutoCommit(false);
+
     // Save addresses to database and save them back to initial order instance
     order.setBillingAddress(AddressController.createAddress(order.getBillingAddress()));
     order.setShippingAddress(AddressController.createAddress(order.getShippingAddress()));
@@ -193,4 +196,6 @@ public class OrderController {
     }
   }
     return null;
+    }
 }
+

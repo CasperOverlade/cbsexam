@@ -174,7 +174,20 @@ public class UserController {
         }
     }
 
-    public static User login(User user) {
+
+  public static User formUser(ResultSet rs){
+
+    try{
+      User u = new User(rs.getInt("u_id"),
+              rs.getString("first_name"),
+              rs.getString("last_name"),
+              rs.getString("password"),
+              rs.getString("email"));
+
+      return u;
+    }catch(SQLException e){
 
     }
+    return null;
+  }
 }
