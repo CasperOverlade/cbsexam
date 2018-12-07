@@ -20,7 +20,7 @@ public class ProductEndpoints {
   private static ProductCache productCache = new ProductCache();
 
   //Comment
-  public static boolean forceUpdate = true;
+  public boolean forceUpdate = true;
 
   /**
    * @param idProduct
@@ -40,8 +40,13 @@ public class ProductEndpoints {
     //adds encryption
     json = Encryption.encryptDecryptXOR(json);
 
-    // Return a response with status 200 and JSON as type
-    return Response.status(200).type(MediaType.TEXT_PLAIN_TYPE).entity(json).build();
+    // Return the data to the user
+    if (product != null) {
+      // Return a response with status 200 and JSON as type
+      return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(json).build();
+    } else {
+      return Response.status(404).entity("Could not get product").build();
+    }
   }
 
   /** @return Responses */
@@ -56,13 +61,18 @@ public class ProductEndpoints {
     // We convert the java object to json with GSON library imported in Maven
     String json = new Gson().toJson(products);
 
-    this.forceUpdate = false;
-
     //adds encryption
     json = Encryption.encryptDecryptXOR(json);
 
-    // Return a response with status 200 and JSON as type
-    return Response.status(200).type(MediaType.TEXT_PLAIN_TYPE).entity(json).build();
+    // Return the data to the user
+    if (products != null) {
+      //Now that we have got all the products and created a cache, we do not need to force an update.
+      this.forceUpdate = false;
+      // Return a response with status 200 and JSON as type or 400 if condition is failed
+      return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(json).build();
+    } else {
+      return Response.status(404).entity("Could not get products").build();
+    }
   }
 
   @POST

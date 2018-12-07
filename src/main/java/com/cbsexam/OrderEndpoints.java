@@ -19,7 +19,7 @@ public class OrderEndpoints {
 
   private static OrderCache orderCache = new OrderCache();
 
-  public static boolean forceUpdate = true;
+  public boolean forceUpdate = true;
 
   /**
    * @param idOrder
@@ -39,8 +39,14 @@ public class OrderEndpoints {
     //adds encryption
     json = Encryption.encryptDecryptXOR(json);
 
-    // Return a response with status 200 and JSON as type
-    return Response.status(200).type(MediaType.APPLICATION_JSON).entity(json).build();
+    // Return the data to the user if there was an order
+    if (order != null) {
+      // Return a response with status 200 and JSON as type
+      return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(json).build();
+    } else {
+      // Return a response with status 400 and a message in text
+      return Response.status(404).entity("Could not find order").build();
+    }
   }
 
   /** @return Responses */
@@ -55,14 +61,22 @@ public class OrderEndpoints {
     // We convert the java object to json with GSON library imported in Maven
     String json = new Gson().toJson(orders);
 
+    //adds encryption
+    json = Encryption.encryptDecryptXOR(json);
+
     this.forceUpdate = false;
 
-      //adds encryption
-      json = Encryption.encryptDecryptXOR(json);
+    if (orders != null) {
+      this.forceUpdate = true;
 
-    // Return a response with status 200 and JSON as type
-    return Response.status(200).type(MediaType.TEXT_PLAIN_TYPE).entity(json).build();
+      // Return a response with status 200 and JSON as type
+      return Response.status(200).type(MediaType.TEXT_PLAIN_TYPE).entity(json).build();
+    } else {
+      // Return a response with status 400 and a message in text
+      return Response.status(404).entity("Could not find orders").build();
+    }
   }
+
 
   @POST
   @Path("/")

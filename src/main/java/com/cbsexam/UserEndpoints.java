@@ -15,7 +15,7 @@ import utils.Log;
 public class UserEndpoints {
 
   private static UserCache userCache = new UserCache();
-  public static boolean forceUpdate=true;
+  public  boolean forceUpdate=true;
 
   /**
    * @param idUser
@@ -62,9 +62,14 @@ public class UserEndpoints {
       //adds encryption
       json = Encryption.encryptDecryptXOR(json);
 
-      this.forceUpdate = false;
-    // Return the users with the status code 200
-    return Response.status(200).type(MediaType.APPLICATION_JSON).entity(json).build();
+      // Return the users with the status code 200 for success or 404 if failed
+      if (users != null) {
+          // Now that we have created a cache, we do not need to force update before there are changes made.
+          this.forceUpdate = false;
+          return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(json).build();
+      } else {
+          return Response.status(404).entity("Could not find users").build();
+      }
   }
 
   @POST
