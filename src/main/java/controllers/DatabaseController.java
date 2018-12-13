@@ -24,25 +24,27 @@ public class DatabaseController {
    */
   public static Connection getConnection() {
     try {
-      // Set the dataabase connect with the data from the config
-      String url =
-          "jdbc:mysql://"
-              + Config.getDatabaseHost()
-              + ":"
-              + Config.getDatabasePort()
-              + "/"
-              + Config.getDatabaseName()
-              + "?serverTimezone=CET";
 
-      String user = Config.getDatabaseUsername();
-      String password = Config.getDatabasePassword();
+      if (connection == null) {
+        // Set the dataabase connect with the data from the config
+        String url =
+                "jdbc:mysql://"
+                        + Config.getDatabaseHost()
+                        + ":"
+                        + Config.getDatabasePort()
+                        + "/"
+                        + Config.getDatabaseName()
+                        + "?serverTimezone=CET";
 
-      // Register the driver in order to use it
-      DriverManager.registerDriver(new com.mysql.jdbc.Driver());
+        String user = Config.getDatabaseUsername();
+        String password = Config.getDatabasePassword();
 
-      // create a connection to the database
-      connection = DriverManager.getConnection(url, user, password);
+        // Register the driver in order to use it
+        DriverManager.registerDriver(new com.mysql.jdbc.Driver());
 
+        // create a connection to the database
+        connection = DriverManager.getConnection(url, user, password);
+      }
     } catch (SQLException e) {
       System.out.println(e.getMessage());
     }
@@ -112,32 +114,24 @@ public class DatabaseController {
     return result;
   }
 
-  public boolean update(User user) {
+  public boolean update (String sql) {
 
-    // Check that we have connection
+    //
     if (connection == null)
       connection = getConnection();
 
     try {
+      PreparedStatement preparedStatement = connection.prepareStatement(sql);
 
-      PreparedStatement updateUser = connection.prepareStatement("UPDATE user SET " + "first_name = ?, "
-              + "last_name= ?, " + "password = ?, " + "email = ?, " + "created_at = ? " + "WHERE id = ?");
+      int rowaffected = preparedStatement.executeUpdate();
 
-      updateUser.setString(1, user.getFirstname());
-      updateUser.setString(2, user.getLastname());
-      updateUser.setString(3, user.getPassword());
-      updateUser.setString(4, user.getEmail());
-      updateUser.setLong(5, user.getCreatedTime());
-      updateUser.setInt(6,user.getId());
-
-      int rowsAffected = updateUser.executeUpdate();
-
-      if (rowsAffected == 1) {
+      if (rowaffected==1)
         return true;
-      }
-    } catch (SQLException sqlException) {
-      sqlException.printStackTrace();
+
+    } catch (SQLException e) {
+      e.printStackTrace();
     }
+
     return false;
   }
 
