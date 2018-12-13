@@ -51,6 +51,7 @@
           <element id="library" level="project" name="Maven: org.jetbrains:annotations:13.0" />
         </element>
       </element>
+      <element id="javaee-facet-resources" facet="cbsexam/web/Web2" />
     </root>
   </artifact>
 </component>
