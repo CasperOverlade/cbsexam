@@ -7,7 +7,7 @@ import model.Product;
 import utils.Log;
 
 public class LineItemController {
-  
+
   private static DatabaseController dbCon;
 
   public LineItemController() {

@@ -17,10 +17,11 @@ import utils.Encryption;
 @Path("product")
 public class ProductEndpoints {
 
-  private static ProductCache productCache = new ProductCache();
+  //This is the cache we save the products in.
+  public static ProductCache cache = new ProductCache();
 
-  //Comment
-  public boolean forceUpdate = true;
+  //Variable is used to tell if an update of the cache is in need
+  private static boolean forceUpdate=true;
 
   /**
    * @param idProduct
@@ -31,7 +32,7 @@ public class ProductEndpoints {
   public Response getProduct(@PathParam("idProduct") int idProduct) {
 
     // Call our controller-layer in order to get the order from the DB
-    Product product = ProductController.getProduct(idProduct);
+    Product product = cache.getProduct(forceUpdate, idProduct);
 
     // TODO: Add Encryption to JSON : FIX
     // We convert the java object to json with GSON library imported in Maven
@@ -55,7 +56,7 @@ public class ProductEndpoints {
   public Response getProducts() {
 
     // Call our controller-layer in order to get the order from the DB
-    ArrayList<Product> products = productCache.getProducts(forceUpdate);
+    ArrayList<Product> products = cache.getProducts(forceUpdate);
 
     // TODO: Add Encryption to JSON : FIX
     // We convert the java object to json with GSON library imported in Maven
