@@ -1,11 +1,10 @@
 package cache;
 
 import controllers.OrderController;
-import controllers.ProductController;
+
 import java.util.ArrayList;
 
 import model.Order;
-import model.Product;
 import utils.Config;
 
 // TODO: Build this cache and use it : FIX
@@ -34,7 +33,7 @@ public class OrderCache {
                 || this.orders.isEmpty()) {
 
             // Get orders from controller, since we wish to update.
-            ArrayList<Order> orders = OrderController.getOrders();
+            ArrayList<Order> orders = OrderController.getAllOrders();
 
             System.out.println("TestOrder");
 
