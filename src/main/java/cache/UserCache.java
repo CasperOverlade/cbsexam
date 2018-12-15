@@ -1,12 +1,7 @@
 package cache;
 
-import controllers.OrderController;
-import controllers.ProductController;
-import java.util.ArrayList;
-
 import controllers.UserController;
-import model.Order;
-import model.Product;
+import java.util.ArrayList;
 import model.User;
 import utils.Config;
 
@@ -27,15 +22,15 @@ public class UserCache {
 
     public ArrayList<User> getUsers(Boolean forceUpdate) {
 
-        // If we whis to clear cache, we can set force update.
+        // If we want to clear cache, we can set force update.
         // Otherwise we look at the age of the cache and figure out if we should update.
         // If the list is empty we also check for new users
         if (forceUpdate
                 || ((this.created + this.ttl) <= (System.currentTimeMillis() / 1000L))
-                || this.users==null()) {
+                || this.users==null) {
 
             // Get users from controller, since we wish to update.
-            ArrayList<User> users = UserController.getUsers();
+            ArrayList<User> users = UserController.getAllUsers();
 
             // Set users for the instance and set created timestamp
             this.users = users;
