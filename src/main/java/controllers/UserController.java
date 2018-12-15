@@ -1,11 +1,13 @@
 package controllers;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import model.User;
 import utils.Hashing;
 import utils.Log;
+import utils.Token;
 
 public class UserController {
 
@@ -136,43 +138,41 @@ public class UserController {
     return user;
   }
 
-  public static User updateUser(User user) {
+  public static boolean updateUser(User user) {
 
-    // Write in log that we've reach this step
     Log.writeLog(UserController.class.getName(), user, "Actually updating a user in DB", 0);
+
+    if (dbCon == null) {
+      dbCon = new DatabaseController();
+    }
+
+    user.setPassword(Hashing.sha(user.getPassword()));
+
+    boolean affected = dbCon.update(
+            "UPDATE user SET " +
+                    "first_name = " + "'" + user.getFirstname() + "'," +
+                    "last_name = " + "'" + user.getLastname() + "'," +
+                    "password = " + "'" + user.getPassword() + "'," +
+                    "email = " + "'" + user.getEmail() + "'" +
+                    "WHERE u_id = " + "'" + user.getId() + "'");
+
+    return affected;
+  }
+
+  public static boolean deleteUser(int idUser) {
 
     // Check for DB Connection
     if (dbCon == null) {
       dbCon = new DatabaseController();
     }
+    // Build the query for DB
+    String sql = "Delete FROM user where u_id=" + idUser;
 
-    // Insert the user in the DB
-    // TODO: Hash the user password before saving it. FIX
-    user.setPassword(Hashing.sha(user.getPassword()));
+    boolean deleted = dbCon.delete(sql);
 
-    //The prepared statement is done inside the databasecontroller.
-    dbCon.update(user);
+    return deleted;
 
-// Return user
-    return user;
   }
-
-    public static boolean deleteUser(int idUser) {
-
-        // Check for DB Connection
-        if (dbCon == null) {
-            dbCon = new DatabaseController();
-        }
-
-        // Build the query for DB
-        String sql = "Delete FROM user where id=" + idUser;
-        boolean deleted = dbCon.delete(sql);
-        if (deleted)
-            return true;
-        else {
-            return false;
-        }
-    }
 
 
   public static User formUser(ResultSet rs){
@@ -190,4 +190,49 @@ public class UserController {
     }
     return null;
   }
+
+  public static User login(User user) {
+
+    // Write in log that we've reach this step
+    Log.writeLog(UserController.class.getName(), user, "Trying to log on", 0);
+
+    if (dbCon == null) {
+      dbCon = new DatabaseController();
+    }
+
+    user.setPassword(Hashing.sha(user.getPassword()));
+
+    try {
+
+      String sql = "SELECT * FROM user WHERE email = ? AND password = ?";
+
+      PreparedStatement preparedStatement = dbCon.getConnection().prepareStatement(sql);
+      preparedStatement.setString(1, user.getEmail());
+      preparedStatement.setString(2, user.getPassword());
+
+      ResultSet rs = preparedStatement.executeQuery();
+
+      if (rs.next()) {
+        user =
+                new User(
+                        rs.getInt("u_id"),
+                        rs.getString("first_name"),
+                        rs.getString("last_name"),
+                        rs.getString("password"),
+                        rs.getString("email"));
+
+        user.setToken(Token.generateToken(user));
+
+        System.out.println("Logged on");
+
+        return user;
+      } else {
+        System.out.println("No user found");
+      }
+    } catch (SQLException e) {
+      System.out.println(e.getMessage());
+    }
+    return null;
+  }
+
 }

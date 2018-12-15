@@ -20,7 +20,7 @@ public class UserCache {
     private long ttl;
 
     // Sets when the cache has been created
-    private long created;
+    private static long created;
 
     public UserCache() {this.ttl = Config.getUserTtl();
     }
@@ -32,12 +32,10 @@ public class UserCache {
         // If the list is empty we also check for new users
         if (forceUpdate
                 || ((this.created + this.ttl) <= (System.currentTimeMillis() / 1000L))
-                || this.users.isEmpty()) {
+                || this.users==null()) {
 
             // Get users from controller, since we wish to update.
             ArrayList<User> users = UserController.getUsers();
-
-            System.out.println("TestUser");
 
             // Set users for the instance and set created timestamp
             this.users = users;
@@ -46,5 +44,27 @@ public class UserCache {
 
         // Return the documents
         return this.users;
+    }
+
+    public User getUser(boolean forceUpdate, int userID) {
+        User user = new User();
+
+        if (forceUpdate
+                || ((this.created + this.ttl) <= (System.currentTimeMillis())) || this.users==null) {
+
+            // Get the user from controller.
+            user = UserController.getUser(userID);
+
+            return user;
+        } else {
+            // Get user from already created arraylist by comparing ID
+            for (User u : users){
+                if (userID==u.getId())
+                    user = u;
+                return user;
+            }
+        }
+
+        return null;
     }
 }
