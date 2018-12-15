@@ -53,7 +53,7 @@ public class ProductEndpoints {
   /** @return Responses */
   @GET
   @Path("/")
-  public Response getProducts() {
+  public Response getAllProducts() {
 
     // Call our controller-layer in order to get the order from the DB
     ArrayList<Product> products = cache.getProducts(forceUpdate);
