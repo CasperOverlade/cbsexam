@@ -25,7 +25,7 @@ public class UserController {
     }
 
     // Build the query for DB
-    String sql = "SELECT * FROM user where id=" + id;
+    String sql = "SELECT * FROM user where u_id=" + id;
 
     // Actually do the query
     ResultSet rs = dbCon.query(sql);
@@ -36,7 +36,7 @@ public class UserController {
       if (rs.next()) {
         user =
             new User(
-                rs.getInt("id"),
+                rs.getInt("u_id"),
                 rs.getString("first_name"),
                 rs.getString("last_name"),
                 rs.getString("password"),
@@ -60,7 +60,7 @@ public class UserController {
    *
    * @return
    */
-  public static ArrayList<User> getUsers() {
+  public static ArrayList<User> getAllUsers() {
 
     // Check for DB connection
     if (dbCon == null) {
@@ -79,7 +79,7 @@ public class UserController {
       while (rs.next()) {
         User user =
             new User(
-                rs.getInt("id"),
+                rs.getInt("u_id"),
                 rs.getString("first_name"),
                 rs.getString("last_name"),
                 rs.getString("password"),
@@ -175,7 +175,7 @@ public class UserController {
   }
 
 
-  public static User formUser(ResultSet rs){
+  public static User makeUser(ResultSet rs){
 
     try{
       User u = new User(rs.getInt("u_id"),
