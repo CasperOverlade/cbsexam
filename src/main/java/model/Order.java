@@ -16,13 +16,13 @@ public class Order {
   public Order() {}
 
   public Order(
-      User customer,
-      ArrayList<LineItem> lineItems,
-      Address billingAddress,
-      Address shippingAddress,
-      float orderTotal,
-      long createdAt,
-      long updatedAt) {
+          User customer,
+          ArrayList<LineItem> lineItems,
+          Address billingAddress,
+          Address shippingAddress,
+          float orderTotal,
+          long createdAt,
+          long updatedAt) {
     this.customer = customer;
     this.lineItems = lineItems;
     this.billingAddress = billingAddress;
@@ -33,19 +33,36 @@ public class Order {
   }
 
   public Order(
-      int id,
-      User customer,
-      ArrayList<LineItem> lineItems,
-      Address billingAddress,
-      Address shippingAddress,
-      float orderTotal,
-      long createdAt,
-      long updatedAt) {
+          int id,
+          User customer,
+          ArrayList<LineItem> lineItems,
+          Address billingAddress,
+          Address shippingAddress,
+          float orderTotal,
+          long createdAt,
+          long updatedAt) {
     this.id = id;
     this.customer = customer;
     this.lineItems = lineItems;
     this.billingAddress = billingAddress;
     this.shippingAddress = shippingAddress;
+    this.orderTotal = orderTotal;
+    this.createdAt = createdAt;
+    this.updatedAt = updatedAt;
+  }
+
+  public Order(
+          int id,
+          User customer,
+          ArrayList<LineItem> lineItems,
+          Address billingAddress,
+          float orderTotal,
+          long createdAt,
+          long updatedAt) {
+    this.id = id;
+    this.customer = customer;
+    this.lineItems = lineItems;
+    this.billingAddress = billingAddress;
     this.orderTotal = orderTotal;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
