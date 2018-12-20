@@ -70,7 +70,7 @@ public class OrderEndpoints {
 
 
       // Returner svar med status 200 og JSOn som type
-      return Response.status(200).type(MediaType.TEXT_PLAIN_TYPE).entity(json).build();
+      return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(json).build();
     } else {
       // Returner svar med status 404 og beskeden i teksten
       return Response.status(404).entity("Kunne ikke finde ordre").build();
