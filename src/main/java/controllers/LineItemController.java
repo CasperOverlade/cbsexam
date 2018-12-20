@@ -16,20 +16,20 @@ public class LineItemController {
 
   public static LineItem createLineItem(LineItem lineItem, int orderID) {
 
-    // Write in log that we've reach this step
+    // Skriver i log at vi er her
     Log.writeLog(ProductController.class.getName(), lineItem, "Actually creating a line item in DB", 0);
 
-    // Check for DB Connection
+    // Check forbindelse
     if (dbCon == null) {
       dbCon = new DatabaseController();
     }
 
-    // Get the ID of the product, since the user will not send it to us.
+    // Får produkt ID siden brugeren ikke sender det til os
     lineItem.getProduct().setId(ProductController.getProductBySku(lineItem.getProduct().getSku()).getId());
 
-    // Update the ID of the product
+    // Opdatere produkt id
 
-    // Insert the line item in the DB
+    // Insætter lineItem i DB
     int lineItemID = dbCon.insert(
             "INSERT INTO line_item(product_id, order_id, l_price, quantity) VALUES("
                     + lineItem.getProduct().getId()
@@ -42,17 +42,18 @@ public class LineItemController {
                     + ")");
 
     if (lineItemID != 0) {
-      //Update the line item id of the line item before returning
+      //Updatere lineItem id før det returneres
       lineItem.setId(lineItemID);
       return lineItem;
 
     } else{
-      // Return null if line item has not been inserted into database
+      // Returner null hvis det ikke blev sat i DB
       return null;
     }
   }
 
-  public static LineItem formLineItem (ResultSet rs, Product product) {
+  //createLineItem instanciere, initialisere og deklerere an LineItem objekt baseret på information fra resultset
+  public static LineItem createLineItem(ResultSet rs, Product product) {
     try {
       LineItem lineItem = new LineItem(rs.getInt("l_id"),product,
               rs.getInt("quantity"),

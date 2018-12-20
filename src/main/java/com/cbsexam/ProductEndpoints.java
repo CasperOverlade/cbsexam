@@ -17,10 +17,10 @@ import utils.Encryption;
 @Path("product")
 public class ProductEndpoints {
 
-  //This is the cache we save the products in.
+  //Dette er cachen vi gemmer produkterne i
   public static ProductCache cache = new ProductCache();
 
-  //Variable is used to tell if an update of the cache is in need
+  //Fortæller om cachen skal opdateres eller ej
   private static boolean forceUpdate=true;
 
   /**
@@ -31,22 +31,23 @@ public class ProductEndpoints {
   @Path("/{idProduct}")
   public Response getProduct(@PathParam("idProduct") int idProduct) {
 
-    // Call our controller-layer in order to get the order from the DB
+    // Kalder vores controller lag for at få produktet fra databasen
     Product product = cache.getProduct(forceUpdate, idProduct);
 
     // TODO: Add Encryption to JSON : FIX
-    // We convert the java object to json with GSON library imported in Maven
+    // Konvetere Java objektet til json med GSON
     String json = new Gson().toJson(product);
 
-    //adds encryption
+    //tilføjer kryptering
     json = Encryption.encryptDecryptXOR(json);
 
-    // Return the data to the user
+    // Returnere data til brugeren
     if (product != null) {
-      // Return a response with status 200 and JSON as type
+      // Returnere med status 200 og json type
       return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(json).build();
     } else {
-      return Response.status(404).entity("Could not get product").build();
+      //Returnere med status 404 og besked
+      return Response.status(404).entity("Kunne ikke finde produkt").build();
     }
   }
 
@@ -55,24 +56,24 @@ public class ProductEndpoints {
   @Path("/")
   public Response getAllProducts() {
 
-    // Call our controller-layer in order to get the order from the DB
+    // kalder vores controller lag for at hente produkter fra database
     ArrayList<Product> products = cache.getProducts(forceUpdate);
 
     // TODO: Add Encryption to JSON : FIX
-    // We convert the java object to json with GSON library imported in Maven
+    // Konveterer Java objektet til json med GSON
     String json = new Gson().toJson(products);
 
-    //adds encryption
+    // tilføjer kryptering
     json = Encryption.encryptDecryptXOR(json);
 
-    // Return the data to the user
+    // Returnere data til brugeren
     if (products != null) {
-      //Now that we have got all the products and created a cache, we do not need to force an update.
+      //Vi behøver ikke at forceupdate siden produkterne ligger i cachen.
       this.forceUpdate = false;
-      // Return a response with status 200 and JSON as type or 400 if condition is failed
+      // Svarer med status 200 og json hvis der er succes. Status 404 ved fejl
       return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(json).build();
     } else {
-      return Response.status(404).entity("Could not get products").build();
+      return Response.status(404).entity("Kunne ikke hente produkter").build();
     }
   }
 
@@ -81,23 +82,23 @@ public class ProductEndpoints {
   @Consumes(MediaType.APPLICATION_JSON)
   public Response createProduct(String body) {
 
-    // Read the json from body and transfer it to a product class
+    // Læser json fra body og overfører det til produkt klasse
     Product newProduct = new Gson().fromJson(body, Product.class);
 
-    // Use the controller to add the user
+    // Bruger controlleren til at tilføje produktet.
     Product createdProduct = ProductController.createProduct(newProduct);
 
-    // Get the user back with the added ID and return it to the user
+    // Får produktet tilbage med ID og returnere det til brugeren
     String json = new Gson().toJson(createdProduct);
 
-    // Return the data to the user
+    // Returnere data til brugeren
     if (createdProduct != null) {
 
         this.forceUpdate = true;
-      // Return a response with status 200 and JSON as type
+      // Returnere status 200 og json type ved succes. Status 400 ved fejl
       return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(json).build();
     } else {
-      return Response.status(400).entity("Could not create user").build();
+      return Response.status(400).entity("Kunne ikke oprette produkt").build();
     }
   }
 }

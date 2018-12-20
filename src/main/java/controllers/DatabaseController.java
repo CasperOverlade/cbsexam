@@ -26,7 +26,7 @@ public class DatabaseController {
     try {
 
       if (connection == null) {
-        // Set the dataabase connect with the data from the config
+        // Sætter database forbindelse med data fra config
         String url =
                 "jdbc:mysql://"
                         + Config.getDatabaseHost()
@@ -39,10 +39,10 @@ public class DatabaseController {
         String user = Config.getDatabaseUsername();
         String password = Config.getDatabasePassword();
 
-        // Register the driver in order to use it
+        // Registrer driver for at bruge den
         DriverManager.registerDriver(new com.mysql.jdbc.Driver());
 
-        // create a connection to the database
+        // Opretter forbindelse til databasen
         connection = DriverManager.getConnection(url, user, password);
       }
     } catch (SQLException e) {
@@ -59,49 +59,49 @@ public class DatabaseController {
    */
   public ResultSet query(String sql) {
 
-    // Check if we have a connection
+    // Checker om vi har forbindelse
     if (connection == null)
       connection = getConnection();
 
 
-    // We set the resultset as empty.
+    // Vi sætter resultset som tom
     ResultSet rs = null;
 
     try {
-      // Build the statement as a prepared statement
+      // Bygger statement som et prepared statement
       PreparedStatement stmt = connection.prepareStatement(sql);
 
       // Actually fire the query to the DB
       rs = stmt.executeQuery();
 
-      // Return the results
+      // Returnere resultaterne
       return rs;
     } catch (SQLException e) {
       System.out.println(e.getMessage());
     }
 
-    // Return the resultset which at this point will be null
+    // Returnere resultset som på dette punkt vil være null
     return rs;
   }
 
   public int insert(String sql) {
 
-    // Set key to 0 as a start
+    // Sætter 'key' til 0 som start
     int result = 0;
 
-    // Check that we have connection
+    // Checker at vi har forbindelse
     if (connection == null)
       connection = getConnection();
 
     try {
-      // Build the statement up in a safe way
+      // Bygger statement på en sikker måde
       PreparedStatement statement =
           connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
       // Execute query
       result = statement.executeUpdate();
 
-      // Get our key back in order to update the user
+      // Får key tilbage for at updatere brugeren
       ResultSet generatedKeys = statement.getGeneratedKeys();
       if (generatedKeys.next()) {
         return generatedKeys.getInt(1);
@@ -110,10 +110,11 @@ public class DatabaseController {
       System.out.println(e.getMessage());
     }
 
-    // Return the resultset which at this point will be null
+    // Returnere resultSet som vil være null
     return result;
   }
 
+  //Opdatering i DB. Returnerer true hvis update og false hvis ikke
   public boolean update (String sql) {
 
     //
@@ -137,12 +138,12 @@ public class DatabaseController {
 
     public boolean delete(String sql) {
 
-        // Check that we have connection
+        // Checker at vi har forbindelse
         if (connection == null)
             connection = getConnection();
 
         try {
-            // Build the statement as a prepared statement
+            // Bygger statement som et prepared statement
             PreparedStatement stmt = connection.prepareStatement(sql);
 
 

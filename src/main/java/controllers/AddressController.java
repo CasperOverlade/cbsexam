@@ -15,15 +15,15 @@ public class AddressController {
 
   public static Address createAddress(Address address) {
 
-    // Write in log that we've reach this step
+    // Skriver i log at vi er her
     Log.writeLog(ProductController.class.getName(), address, "Actually creating a line item in DB", 0);
 
-    // Check for DB Connection
+    // Checker forbindelse til DB
     if (dbCon == null) {
       dbCon = new DatabaseController();
     }
 
-    // Insert the product in the DB
+    // Indsætter produktet i DB
     int addressID = dbCon.insert(
         "INSERT INTO address(name, city, zipcode, street_address) VALUES('"
             + address.getName()
@@ -47,13 +47,14 @@ public class AddressController {
     return address;
   }
 
-  public static Address formAddress(ResultSet rs) {
+  //createbillingadress deklarere og instantiere et adresse objekt baseret på information fra resultsettet
+  public static Address createBillingAddress(ResultSet rs) {
     try {
-      Address address = new Address(rs.getInt("a_id"),
-              rs.getString("name"),
-              rs.getString("street_address"),
-              rs.getString("city"),
-              rs.getString("zipcode")
+      Address address = new Address(rs.getInt("ba.a_id"),
+              rs.getString("ba.name"),
+              rs.getString("ba.street_address"),
+              rs.getString("ba.city"),
+              rs.getString("ba.zipcode")
       );
 
       return address;
@@ -62,5 +63,23 @@ public class AddressController {
     }
     return null;
   }
-  
+
+  ////createshippingadress deklarere og instantiere et adresse objekt baseret på information fra resultsettet
+  public static Address createShippingAddress(ResultSet rs) {
+    try {
+      Address address = new Address(rs.getInt("sa.a_id"),
+              rs.getString("sa.name"),
+              rs.getString("sa.street_address"),
+              rs.getString("sa.city"),
+              rs.getString("sa.zipcode")
+      );
+
+      return address;
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+
 }

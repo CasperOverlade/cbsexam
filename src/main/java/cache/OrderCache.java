@@ -11,13 +11,13 @@ import utils.Config;
 
 public class OrderCache {
 
-    // List of orders
+    // Liste over ordrer
     private ArrayList<Order> orders;
 
-    // Time cache should live
+    // Livstid på cache
     private long ttl;
 
-    // Sets when the cache has been created
+    // Sætter hvornår cachen er blevet lavet
     private long created;
 
     public OrderCache() {this.ttl = Config.getOrderTtl();
@@ -25,24 +25,24 @@ public class OrderCache {
 
     public ArrayList<Order> getOrders(Boolean forceUpdate) {
 
-        // If we whis to clear cache, we can set force update.
-        // Otherwise we look at the age of the cache and figure out if we should update.
-        // If the list is empty we also check for new orders
+        // Hvis vi vil rydde cache, kan vi sætte force update
+        // Ellers kigger vi på alderen af cachen, og finder ud af om vi skal opdatere.
+        // Hvis listen er tom checkes der for nye ordre
         if (forceUpdate
                 || ((this.created + this.ttl) <= (System.currentTimeMillis() / 1000L))
                 || this.orders.isEmpty()) {
 
-            // Get orders from controller, since we wish to update.
-            ArrayList<Order> orders = OrderController.getAllOrders();
+            // Siden der skal opdateres, for vi ordrene fra controlleren
+            ArrayList<Order> orders = OrderController.getOrders();
 
             System.out.println("TestOrder");
 
-            // Set orders for the instance and set created timestamp
+            // Sætter ordre for instancen og sætter tiden
             this.orders = orders;
             this.created = System.currentTimeMillis() / 1000L;
         }
 
-        // Return the documents
+        // Returner dokumenterne
         return this.orders;
     }
 
@@ -53,12 +53,12 @@ public class OrderCache {
         if (forceUpdate
                 || ((this.created + this.ttl) <= (System.currentTimeMillis())) || this.orders==null) {
 
-            // If cache needs update: Using the ordercontroller to get order from database
+            // Hvis cache skal opdateres: Bruger ordercontroller for at få ordre fra database
             order = OrderController.getOrder(orderID);
 
             return order;
         } else {
-            // If the cache is alright, go through arraylist till right ID is found **/
+            // Hvis cachen er ok, gå igennem arraylist indtil det rigtige id er fundet
             for (Order o : orders){
                 if (orderID==o.getId())
                     order = o;

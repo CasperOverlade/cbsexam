@@ -77,7 +77,7 @@ public class ProductController {
 
         return product;
       } else {
-        System.out.println("No user found");
+        System.out.println("Ingen bruger fundet");
       }
     } catch (SQLException ex) {
       System.out.println(ex.getMessage());
@@ -91,7 +91,7 @@ public class ProductController {
    *
    * @return
    */
-  public static ArrayList<Product> getAllProducts() {
+  public static ArrayList<Product> getProducts() {
 
     if (dbCon == null) {
       dbCon = new DatabaseController();
@@ -163,7 +163,7 @@ public class ProductController {
     return product;
   }
 
-  public static Product makeProduct(ResultSet rs) {
+  public static Product createProduct(ResultSet rs) {
     try {
       Product product = new Product(rs.getInt("p_id"),
               rs.getString("product_name"),

@@ -19,7 +19,7 @@ public class OrderEndpoints {
 
   private static OrderCache orderCache = new OrderCache();
 
-  public boolean forceUpdate = true;
+  public static boolean forceUpdate = true;
 
   /**
    * @param idOrder
@@ -29,23 +29,23 @@ public class OrderEndpoints {
   @Path("/{idOrder}")
   public Response getOrder(@PathParam("idOrder") int idOrder) {
 
-    // Call our controller-layer in order to get the order from the DB
-    Order order = OrderController.getOrder(idOrder);
+    // Kalder vores controller lag for at få ordren fra databasen
+    Order order = orderCache.getOrder(forceUpdate, idOrder);
 
     // TODO: Add Encryption to JSON : FIX
-    // We convert the java object to json with GSON library imported in Maven
+    // Her konverteres java objektet til json med GSON biblioteket importeret i Maven
     String json = new Gson().toJson(order);
 
-    //adds encryption
+    //Tilføjer kryptering
     json = Encryption.encryptDecryptXOR(json);
 
-    // Return the data to the user if there was an order
+    // Returnere dataen til brugeren hvis der var en ordre
     if (order != null) {
-      // Return a response with status 200 and JSON as type
+      // Returner svar med status 200 og JSOn som type
       return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(json).build();
     } else {
-      // Return a response with status 400 and a message in text
-      return Response.status(404).entity("Could not find order").build();
+      // Returner svar med status 404 og beskeden i teksten
+      return Response.status(404).entity("Kunne ikke finde ordren").build();
     }
   }
 
@@ -54,26 +54,26 @@ public class OrderEndpoints {
   @Path("/")
   public Response getOrders() {
 
-    // Call our controller-layer in order to get the order from the DB
+    // Kalder vores controller lag for at få ordre fra databasen
     ArrayList<Order> orders = orderCache.getOrders(forceUpdate);
 
     // TODO: Add Encryption to JSON : FIX
-    // We convert the java object to json with GSON library imported in Maven
+    // Her konverteres java objektet til json med GSON biblioteket importeret i Maven
     String json = new Gson().toJson(orders);
 
-    //adds encryption
+    //tilføjer kryptering
     json = Encryption.encryptDecryptXOR(json);
 
     this.forceUpdate = false;
-
+    // Returnere dataen til brugeren hvis der var ordrer
     if (orders != null) {
-      this.forceUpdate = true;
 
-      // Return a response with status 200 and JSON as type
+
+      // Returner svar med status 200 og JSOn som type
       return Response.status(200).type(MediaType.TEXT_PLAIN_TYPE).entity(json).build();
     } else {
-      // Return a response with status 400 and a message in text
-      return Response.status(404).entity("Could not find orders").build();
+      // Returner svar med status 404 og beskeden i teksten
+      return Response.status(404).entity("Kunne ikke finde ordre").build();
     }
   }
 
@@ -83,25 +83,25 @@ public class OrderEndpoints {
   @Consumes(MediaType.APPLICATION_JSON)
   public Response createOrder(String body) {
 
-    // Read the json from body and transfer it to a order class
+    // Læser JSON fra body og overfører det to en order class
     Order newOrder = new Gson().fromJson(body, Order.class);
 
-    // Use the controller to add the user
+    // Bruger controlleren til at tilføje ordren
     Order createdOrder = OrderController.createOrder(newOrder);
 
-    // Get the user back with the added ID and return it to the user
+    // For ordren tilbage med ID og returnerer det to ordren
     String json = new Gson().toJson(createdOrder);
 
-    // Return the data to the user
+    // Returner dataen til ordren
     if (createdOrder != null) {
 
       this.forceUpdate = true;
-      // Return a response with status 200 and JSON as type
+      // Returner svar med status 200 og JSON som type
       return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(json).build();
     } else {
 
-      // Return a response with status 400 and a message in text
-      return Response.status(400).entity("Could not create user").build();
+      // Returner svar med status 400 og beskeden i teksten
+      return Response.status(400).entity("Kunne ikke oprette ordre").build();
     }
   }
 }

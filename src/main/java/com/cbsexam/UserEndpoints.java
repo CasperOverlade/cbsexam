@@ -17,7 +17,7 @@ public class UserEndpoints {
 
   //cashen vi gemmer brugere i
   private static UserCache userCache = new UserCache();
-  public  boolean forceUpdate = true;
+  public static boolean forceUpdate = true;
 
   /**
    * @param idUser
@@ -27,22 +27,23 @@ public class UserEndpoints {
   @Path("/{idUser}")
   public Response getUser(@PathParam("idUser") int idUser) {
 
-    // Use the ID to get the user from the controller.
+    // Bruger ID for at få brugeren fra controlleren
       User user = userCache.getUser(forceUpdate, idUser);
 
     // TODO: Add Encryption to JSON : FIX
-    // Convert the user object to json in order to return the object
+    // Konvertere brugeren til JSON for at returnere objektet
     String json = new Gson().toJson(user);
 
-      //adds encryption
+      //Tilføjer kryptering
       json = Encryption.encryptDecryptXOR(json);
 
-    // Return the user with the status code 200
     // TODO: What should happen if something breaks down? : FIX
+      // Returner svar med status 200 og JSON som type
       if (user != null) {
           return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(json).build();
       } else {
-          return Response.status(400).entity("this user has not yet been created :-(").build();
+          // Returner svar med status 400 og beskeden i teksten
+          return Response.status(400).entity("Brugeren findes ikke").build();
       }
   }
 
@@ -51,26 +52,26 @@ public class UserEndpoints {
   @Path("/")
   public Response getUsers() {
 
-    // Write to log that we are here
+    // Skriver til log'en at vi er her
     Log.writeLog(this.getClass().getName(), this, "Get all users", 0);
 
-    // Get a list of users
+    // For en liste med brugere
     ArrayList<User> users = userCache.getUsers(forceUpdate);
 
     // TODO: Add Encryption to JSON : FIX
-    // Transfer users to json in order to return it to the user
+    // Konvertere bruger til JSON for at returnere dem
     String json = new Gson().toJson(users);
 
-      //adds encryption
+      //Tilføjer kryptering
       json = Encryption.encryptDecryptXOR(json);
 
-      // Return the users with the status code 200 for success or 404 if failed
+      // Returnere brugerne med status 200 ved succes eller 404 med fejl
       if (users != null) {
-          // Now that we have created a cache, we do not need to force update before there are changes made.
+          // På grund af cachen behøver vi ikke at forceupdate.
           this.forceUpdate = false;
           return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(json).build();
       } else {
-          return Response.status(404).entity("Could not find users").build();
+          return Response.status(404).entity("Kunne ikke finde brugere").build();
       }
   }
 
@@ -79,23 +80,23 @@ public class UserEndpoints {
   @Consumes(MediaType.APPLICATION_JSON)
   public Response createUser(String body) {
 
-    // Read the json from body and transfer it to a user class
+    // Læser json fra body and overfører det til en bruger klasse
     User newUser = new Gson().fromJson(body, User.class);
 
-    // Use the controller to add the user
+    // Bruger controlleren til at tilføje en bruger
     User createUser = UserController.createUser(newUser);
 
-    // Get the user back with the added ID and return it to the user
+    // Får brugeren tilbage med tilføjet id og returnere det til brugeren
     String json = new Gson().toJson(createUser);
 
-    // Return the data to the user
+    // Returnere dataen til brugeren
     if (createUser != null) {
 
         this.forceUpdate = true;
-      // Return a response with status 200 and JSON as type
+      // Returnere brugerne med status 200 ved succes eller 404 med fejl
       return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(json).build();
     } else {
-      return Response.status(400).entity("Could not create user").build();
+      return Response.status(400).entity("Kunne ikke oprette bruger").build();
     }
   }
 
@@ -105,21 +106,21 @@ public class UserEndpoints {
   @Consumes(MediaType.APPLICATION_JSON)
   public Response loginUser(String body) {
 
-      // Read the json from body and transfer it to a user class
+      // Læser json fra body and overfører det til en bruger klasse
       User userToCome = new Gson().fromJson(body, User.class);
 
-      // Use the email and password to get the user verify the user in the controller which also gives them a token.
+      // Bruger email og kode til at verificere brugern i controlleren. Dette giver også en token.
       User user = UserController.login(userToCome);
 
-      // Return the user with the status code 200 if succesful or 401 if failed
+      // Returnere brugerne med status 200 ved succes og token eller 401 med fejl
       if (user != null) {
           //Welcoming the user and providing him/her with the token they need in order to delete or update their user.
-          String msg = "Hi again " + user.getFirstname() + "! You are logged on and will now receive a token - please save it" +
-                  "as you will need it throughout the system. Here is your token:\n\n" + user.getToken() + "\n\nShould you" +
-                  "loose your token, you can always log in again";
+          String msg = "Hej igen " + user.getFirstname() + "! Du er logget ind og modtager nu din token. Gem denne!" +
+                  "da du skal bruge den senere. Her er din token:\n\n" + user.getToken() + "\n\nSkulle du " +
+                  "miste din token, kan du altid logge på igen for at få en ny";
           return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(msg).build();
       } else {
-          return Response.status(401).entity("We could not find the user or it does not exist - please try again").build();
+          return Response.status(401).entity("Vi kunne ikke finde brugeren").build();
       }
   }
 
@@ -129,29 +130,28 @@ public class UserEndpoints {
   @Consumes(MediaType.APPLICATION_JSON)
       public Response deleteUser(@PathParam("idUser") int idUser, String body) {
 
-      //Setting a user from the information - note the changes to userobject - we have added token as a instance variable
+      //Sætter en bruger fra informationen, notere ændringer til userobjektet. Der er tilføjet token som instans variabel
       User userToDelete = new Gson().fromJson(body, User.class);
 
-      // Write to log that we are here
+      // Srkiver i log'en at vi er her
       Log.writeLog(this.getClass().getName(), this, "Deleting a user", 0);
 
-      // Use the ID and token to first verify the possibly delete the user from the database via controller.
+      // bruger ID og token til at verificere om det er muligt at slette brugeren fra databasen via controller
       if (Token.verifyToken(userToDelete.getToken(), userToDelete)) {
           boolean deleted = UserController.deleteUser(idUser);
 
-          //if user was deleted we need to force an update on cache and let the user know it was successfull with status 200
-          //and a message
+          //Hvis brugeren bliver slette cachen opdatere og brugeren skal vide det var en succes med status 200
           if (deleted) {
               forceUpdate = true;
-              // Return a response with status 200 and a massage
-              return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity("User deleted").build();
+              // Returnere med status 200 ved succes og besked
+              return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity("Bruger slettet").build();
           } else {
-              // Return a response with status 200 and a message
-              return Response.status(400).entity("Could not delete the user - try again").build();
+              // Returnere med status 400 ved fejl og besked
+              return Response.status(400).entity("Kunne ikke slette brugeren. Prøv igen").build();
           }
       } else {
-          //If the token verifier does not check out.
-          return Response.status(401).entity("You're not authorized to do this").build();
+          // Hvis token ikke kan verificeres
+          return Response.status(401).entity("Du er ikke tilladt at foretage dette").build();
       }
   }
 
@@ -161,30 +161,29 @@ public class UserEndpoints {
   @Consumes(MediaType.APPLICATION_JSON)
           public Response updateUser(@PathParam("idUser") int idUser, String body) {
 
-              //Setting a user from the information - note the changes to the user object - we have added token as a instance variable
+            //Sætter en bruger fra informationen, notere ændringer til userobjektet. Der er tilføjet token som instans variabel
               User userToUpdate = new Gson().fromJson(body, User.class);
 
-              //Writing log letting know we are here.
+              // Skriver i log'en at vi er her
               Log.writeLog(this.getClass().getName(), this, "Updating a user", 0);
 
-              // Use the ID and token to first verify the possibly update the user in the database via controller.
+              //bruger ID og token til at verificere om det er muligt at opdatere brugeren fra databasen via controller
               if (Token.verifyToken(userToUpdate.getToken(), userToUpdate)) {
                   boolean affected = UserController.updateUser(userToUpdate);
 
-                  //If we have updated the user, we need to force an update on cache and let the user know it was successfull with status 200
-                  //and returning the json.
+                  //Hvis brugeren bliver opdateret skal cachen opdateres og brugeren skal vide det var en succes med status 200
                   if (affected) {
                       forceUpdate = true;
                       String json = new Gson().toJson(userToUpdate);
 
-                      //Returning responses to user
+                      //returnere svar til brugeren
                       return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(json).build();
                   } else {
-                      return Response.status(400).entity("Could not update the user").build();
+                      return Response.status(400).entity("Kunne ikke opdatere bruger").build();
                   }
               } else {
-                  //If the token verifier does not check out.
-                  return Response.status(401).entity("You're not authorized to do this ").build();
+                  //Hvis token ikke kan verificeres
+                  return Response.status(401).entity("Du er ikke tilladt at gøre dette ").build();
               }
           }
 }

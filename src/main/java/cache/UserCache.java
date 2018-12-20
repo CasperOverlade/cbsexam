@@ -6,38 +6,41 @@ import model.User;
 import utils.Config;
 
 // TODO: Build this cache and use it : FIX
+
+
 public class UserCache {
 
-    // List of users
+    // Liste over produkter
     private ArrayList<User> users;
 
-    // Time cache should live
+    // Livstid på cache
     private long ttl;
 
-    // Sets when the cache has been created
+    // Sætter hvornår cachen er blevet lavet
     private static long created;
 
-    public UserCache() {this.ttl = Config.getUserTtl();
-    }
+    public UserCache() {this.ttl = Config.getUserTtl(); }
 
     public ArrayList<User> getUsers(Boolean forceUpdate) {
 
-        // If we want to clear cache, we can set force update.
-        // Otherwise we look at the age of the cache and figure out if we should update.
-        // If the list is empty we also check for new users
+        // Hvis vi vil rydde cache, kan vi sætte force update
+        // Ellers kigger vi på alderen af cachen, og finder ud af om vi skal opdatere.
+        // Hvis listen er tom checkes der for nye users
         if (forceUpdate
-                || ((this.created + this.ttl) <= (System.currentTimeMillis() / 1000L))
+                || ((this.created + this.ttl) <= (System.currentTimeMillis()))
                 || this.users==null) {
 
-            // Get users from controller, since we wish to update.
-            ArrayList<User> users = UserController.getAllUsers();
+            // Siden der skal opdateres, for vi userne fra controlleren
+            ArrayList<User> users = UserController.getUsers();
 
-            // Set users for the instance and set created timestamp
+            System.out.println("Cachen virker");
+
+            // Sætter users for instancen og sætter tiden
             this.users = users;
-            this.created = System.currentTimeMillis() / 1000L;
+            this.created = System.currentTimeMillis();
         }
 
-        // Return the documents
+        // Returner dokumenterne
         return this.users;
     }
 
@@ -47,12 +50,12 @@ public class UserCache {
         if (forceUpdate
                 || ((this.created + this.ttl) <= (System.currentTimeMillis())) || this.users==null) {
 
-            // Get the user from controller.
+            // Hvis cache skal opdateres: Bruges productcontroller for at få user fra database
             user = UserController.getUser(userID);
 
             return user;
         } else {
-            // Get user from already created arraylist by comparing ID
+            // Hvis cachen er ok, gå igennem arraylist indtil det rigtige id er fundet
             for (User u : users){
                 if (userID==u.getId())
                     user = u;

@@ -7,9 +7,11 @@ import org.bouncycastle.util.encoders.Hex;
 
 public final class Hashing {
 
+  // Sætter salt krypteringen
   private static String salt = "meta43fds";
 
   // TODO: You should add a salt and make this secure : FIX
+  /*
   public static String md5(String rawString) {
     try {
 
@@ -40,22 +42,26 @@ public final class Hashing {
 
     return null;
   }
+   */
 
   // TODO: You should add a salt and make this secure : FIX
+
+
   public static String sha(String rawString) {
     try {
-      // We load the hashing algoritm we wish to use.
+      // Vi indlæser den hashing algoritme vi vil bruge
       MessageDigest digest = MessageDigest.getInstance("SHA-256");
 
+      // vi tilføjere salt
       digest.update(salt.getBytes());
 
-      // We convert to byte array
+      // Vi konvertere til byte array
       byte[] hash = digest.digest(rawString.getBytes(StandardCharsets.UTF_8));
 
-      // We create the hashed string
+      // Laver laver hashing strengen
       String sha256hex = new String(Hex.encode(hash));
 
-      // And return the string
+      // og returnere strengen
       return sha256hex;
 
     } catch (NoSuchAlgorithmException e) {

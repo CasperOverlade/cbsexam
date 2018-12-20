@@ -60,7 +60,8 @@ public class UserController {
    *
    * @return
    */
-  public static ArrayList<User> getAllUsers() {
+
+  public static ArrayList<User> getUsers() {
 
     // Check for DB connection
     if (dbCon == null) {
@@ -108,7 +109,7 @@ public class UserController {
     if (dbCon == null) {
       dbCon = new DatabaseController();
     }
-
+    //hashing user password
     user.setPassword(Hashing.sha(user.getPassword()));
 
     // Insert the user in the DB
@@ -146,6 +147,7 @@ public class UserController {
       dbCon = new DatabaseController();
     }
 
+    //hashing password before saving it
     user.setPassword(Hashing.sha(user.getPassword()));
 
     boolean affected = dbCon.update(
@@ -174,8 +176,8 @@ public class UserController {
 
   }
 
-
-  public static User makeUser(ResultSet rs){
+  //initialising, instansiating and declaring a user, to be returned.
+  public static User formUser(ResultSet rs){
 
     try{
       User u = new User(rs.getInt("u_id"),
@@ -194,7 +196,7 @@ public class UserController {
   public static User login(User user) {
 
     // Write in log that we've reach this step
-    Log.writeLog(UserController.class.getName(), user, "Trying to log on", 0);
+    Log.writeLog(UserController.class.getName(), user, "Prøver at logge ind", 0);
 
     if (dbCon == null) {
       dbCon = new DatabaseController();
@@ -213,21 +215,22 @@ public class UserController {
       ResultSet rs = preparedStatement.executeQuery();
 
       if (rs.next()) {
-        user =
-                new User(
+        user = new User(
                         rs.getInt("u_id"),
                         rs.getString("first_name"),
                         rs.getString("last_name"),
                         rs.getString("password"),
                         rs.getString("email"));
 
-        user.setToken(Token.generateToken(user));
+      String j = Token.generateToken(user);
 
-        System.out.println("Logged on");
+      user.setToken(Token.generateToken(user));
+
+        System.out.println("Logget ind");
 
         return user;
       } else {
-        System.out.println("No user found");
+        System.out.println("Ingen bruger fundet");
       }
     } catch (SQLException e) {
       System.out.println(e.getMessage());

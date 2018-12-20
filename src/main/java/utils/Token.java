@@ -1,5 +1,6 @@
 package utils;
 
+
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -10,16 +11,10 @@ import java.util.Date;
 
 public final class Token {
 
-    private String token;
-
-    public Token(String token) {
-        this.token = token;
-    }
-
-
-    public static String generateToken(User user) {
-
+    //her bliver token lavet
+    public static String generateToken(User user) throws JWTVerificationException{
         try {
+            // We load the hashing algorithm we wish to use. And create the token with claims.
             Algorithm algorithm = Algorithm.HMAC256("secret");
             String token = JWT.create()
                     .withIssuer("auth0")
@@ -35,7 +30,7 @@ public final class Token {
         return null;
     }
 
-
+    // Her bliver token verificeret
     public static boolean verifyToken(String token, User user) {
 
 

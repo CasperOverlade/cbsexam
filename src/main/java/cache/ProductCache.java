@@ -7,13 +7,13 @@ import utils.Config;
 
 public class ProductCache {
 
-  // List of products
+  // Liste over produkter
   private static ArrayList<Product> products;
 
-  // Time cache should live
+  // Livstid på cache
   private long timetolive;
 
-  // Sets when the cache has been created
+  // Sætter hvornår cachen er blevet lavet
   private static long created;
 
   public ProductCache() {
@@ -22,23 +22,25 @@ public class ProductCache {
 
   public ArrayList<Product> getProducts(Boolean forceUpdate) {
 
-    // If we whis to clear cache, we can set force update.
-    // Otherwise we look at the age of the cache and figure out if we should update.
-    // If the list is empty we also check for new products
+    // Hvis vi vil rydde cache, kan vi sætte force update
+    // Ellers kigger vi på alderen af cachen, og finder ud af om vi skal opdatere.
+    // Hvis listen er tom checkes der for nye produkter
     if (forceUpdate
         || ((this.created + this.timetolive) <= (System.currentTimeMillis() / 1000L))
         || this.products==null) {
 
-      // Get products from controller, since we wish to update.
-      ArrayList<Product> products = ProductController.getAllProducts();
+      // Siden der skal opdateres, for vi ordrene fra controlleren
+      ArrayList<Product> products = ProductController.getProducts();
+
+      System.out.println("Cachen virker");
 
 
-      // Set products for the instance and set created timestamp
+      // Sætter ordre for instancen og sætter tiden
       this.products = products;
       this.created = System.currentTimeMillis() / 1000L;
     }
 
-    // Return the documents
+    // Returner dokumenterne
     return this.products;
   }
 
@@ -48,12 +50,12 @@ public class ProductCache {
     if (forceUpdate
             || ((this.created + this.timetolive) <= (System.currentTimeMillis())) || this.products==null) {
 
-      // Get product from controller based on id
+      // Hvis cache skal opdateres: Bruges productcontroller for at få produkt fra database
       product = ProductController.getProduct(productID);
 
       return product;
     } else {
-      // If the cache is alright, go through arraylist till right product_ID is found
+      // Hvis cachen er ok, gå igennem arraylist indtil det rigtige id er fundet
       for (Product p : products){
         if (productID==p.getId())
           product = p;

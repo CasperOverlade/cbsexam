@@ -24,7 +24,7 @@ public final class SolrController {
    */
   public static HttpSolrClient getConnection() {
 
-    // Build a URL string with settings from config
+    // Bygger URL streng med instillinger fra config
     String urlString =
         "http://"
             + Config.getSolrHost()
@@ -35,7 +35,7 @@ public final class SolrController {
             + "/"
             + Config.getSolrCore();
 
-    // Connect to SolR
+    // Forbindelse til Solr
     HttpSolrClient solr = new HttpSolrClient.Builder(urlString).build();
     solr.setParser(new XMLResponseParser());
 
@@ -52,18 +52,18 @@ public final class SolrController {
     if(connection == null)
       connection = getConnection();
 
-    // Search in Solr base on Field and Value
+    // Søg i Solr basered på Field og Value
     SolrQuery query = new SolrQuery();
     query.set("q", field + ":" + value);
 
-    // Create an empty document list
+    // Laver en tom dokument liste
     SolrDocumentList docList = new SolrDocumentList();
 
     try {
-      // Search in Solr
+      // Søg i Solr
       QueryResponse response = connection.query(query);
 
-      // Get the results
+      // For resultaterne
       docList = response.getResults();
 
     } catch (SolrServerException e) {
