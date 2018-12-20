@@ -54,7 +54,7 @@ public class ProductEndpoints {
   /** @return Responses */
   @GET
   @Path("/")
-  public Response getAllProducts() {
+  public Response getProducts() {
 
     // kalder vores controller lag for at hente produkter fra database
     ArrayList<Product> products = cache.getProducts(forceUpdate);

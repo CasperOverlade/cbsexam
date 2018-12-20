@@ -25,7 +25,7 @@ public class DatabaseController {
   public static Connection getConnection() {
     try {
 
-      if (connection == null) {
+      if (connection == null || connection.isClosed()) {
         // Sætter database forbindelse med data fra config
         String url =
                 "jdbc:mysql://"

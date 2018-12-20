@@ -46,6 +46,7 @@ public class UserCache {
 
     public User getUser(boolean forceUpdate, int userID) {
         User user = new User();
+        user.setId(userID);
 
         if (forceUpdate
                 || ((this.created + this.ttl) <= (System.currentTimeMillis())) || this.users==null) {

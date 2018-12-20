@@ -1,7 +1,9 @@
 package controllers;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import model.Product;
 import utils.Log;
@@ -14,151 +16,180 @@ public class ProductController {
     dbCon = new DatabaseController();
   }
 
+
   public static Product getProduct(int id) {
 
-    // check for connection
-    if (dbCon == null) {
-      dbCon = new DatabaseController();
-    }
-
-    // Build the SQL query for the DB
-    String sql = "SELECT * FROM product where p_id=" + id;
-
-    // Run the query in the DB and make an empty object to return
-    ResultSet rs = dbCon.query(sql);
-    Product product = null;
-
+    ResultSet rs = null;
     try {
-      // Get first row and create the object and return it
+      // check for connection
+      if (dbCon == null) {
+        dbCon = new DatabaseController();
+      }
+
+      //Building SQL statement and executing query
+      String sql = "SELECT * FROM product where p_id = ?";
+
+      PreparedStatement preparedStatement = dbCon.getConnection().prepareStatement(sql);
+      preparedStatement.setInt(1, id);
+
+      rs = preparedStatement.executeQuery();
+
+      Product product = null;
+
+      // Get first row and initialize through formProduct() the object and return it
       if (rs.next()) {
-        product =
-            new Product(
-                rs.getInt("p_id"),
-                rs.getString("product_name"),
-                rs.getString("sku"),
-                rs.getFloat("price"),
-                rs.getString("description"),
-                rs.getInt("stock"));
+        product = createProduct(rs);
 
         // Return the product
         return product;
       } else {
-        System.out.println("No user found");
+        System.out.println("No product found");
       }
-    } catch (SQLException ex) {
-      System.out.println(ex.getMessage());
-    }
+    }catch (SQLException e){
+      e.printStackTrace();
+    } finally {
+      try {
+        rs.close();
 
+      } catch (SQLException h) {
+        h.printStackTrace();
+        try {
+          dbCon.getConnection().close();
+        } catch (SQLException e) {
+          e.printStackTrace();
+        }
+      }
+    }
     // Return empty object
-    return product;
+    return null;
   }
+
 
   public static Product getProductBySku(String sku) {
 
-    if (dbCon == null) {
-      dbCon = new DatabaseController();
-    }
-
-    String sql = "SELECT * FROM product where sku='" + sku + "'";
-
-    ResultSet rs = dbCon.query(sql);
-    Product product = null;
+    ResultSet rs = null;
 
     try {
-      if (rs.next()) {
-        product =
-            new Product(
-                rs.getInt("p_id"),
-                rs.getString("product_name"),
-                rs.getString("sku"),
-                rs.getFloat("price"),
-                rs.getString("description"),
-                rs.getInt("stock"));
+      // check for connection
+      if (dbCon == null) {
+        dbCon = new DatabaseController();
+      }
 
+      //Building SQL statement and executing query
+      String sql = "SELECT * FROM product where sku = ?";
+
+      PreparedStatement preparedStatement = dbCon.getConnection().prepareStatement(sql);
+      preparedStatement.setString(1, sku);
+
+      rs = preparedStatement.executeQuery();
+
+      Product product = null;
+
+      // Get first row and initialize through formProduct() the object and return it
+      if (rs.next()) {
+        product = createProduct(rs);
         return product;
       } else {
-        System.out.println("Ingen bruger fundet");
+        System.out.println("No product found");
       }
-    } catch (SQLException ex) {
-      System.out.println(ex.getMessage());
+    }catch (SQLException e){
+      e.printStackTrace();
     }
-
-    return product;
+    return null;
   }
 
-  /**
-   * Get all products in database
-   *
-   * @return
-   */
+
   public static ArrayList<Product> getProducts() {
 
-    if (dbCon == null) {
-      dbCon = new DatabaseController();
-    }
-    //TODO: Use cashing layer : FIX
-    String sql = "SELECT * FROM product";
-
-    ResultSet rs = dbCon.query(sql);
-    ArrayList<Product> products = new ArrayList<Product>();
+    ResultSet rs = null;
 
     try {
-      while (rs.next()) {
-        Product product =
-            new Product(
-                rs.getInt("p_id"),
-                rs.getString("product_name"),
-                rs.getString("sku"),
-                rs.getFloat("price"),
-                rs.getString("description"),
-                rs.getInt("stock"));
+      //Check for connection
+      if (dbCon == null) {
+        dbCon = new DatabaseController();
+      }
 
+      //Building SQL statement and executing query
+      String sql = "SELECT * FROM product";
+
+      PreparedStatement preparedStatement = dbCon.getConnection().prepareStatement(sql);
+
+      rs = preparedStatement.executeQuery();
+
+      // TODO: Use caching layer. FIX - See caching
+      ArrayList<Product> products = new ArrayList<Product>();
+
+      // Get first row and initialize through formProduct() the object. Then second row and so on. Add to arraylist
+      //and return.
+      while (rs.next()) {
+        Product product = createProduct(rs);
         products.add(product);
       }
-    } catch (SQLException ex) {
+      return products;
+    }catch(SQLException ex){
       System.out.println(ex.getMessage());
-    }
+    } finally {
+      try {
+        rs.close();
+      } catch (SQLException h) {
+        h.printStackTrace();
+        try {
+          dbCon.getConnection().close();
 
-    return products;
+        } catch (SQLException e) {
+          e.printStackTrace();
+        }
+      }
+    }
+    return null;
   }
 
   public static Product createProduct(Product product) {
+    try {
+      // Write in log that we've reach this step
+      Log.writeLog(ProductController.class.getName(), product, "Actually creating a product in DB", 0);
 
-    // Write in log that we've reach this step
-    Log.writeLog(ProductController.class.getName(), product, "Actually creating a product in DB", 0);
+      // Set creation time for product.
+      product.setCreatedTime(System.currentTimeMillis());
 
-    // Set creation time for product.
-    product.setCreatedTime(System.currentTimeMillis() / 1000L);
 
-    // Check for DB Connection
-    if (dbCon == null) {
-      dbCon = new DatabaseController();
+      // Check for DB Connection
+      if (dbCon == null || dbCon.getConnection().isClosed()) {
+        dbCon = new DatabaseController();
+      }
+
+      //Building SQL statement and executing query
+      String sql = "INSERT INTO product(product_name, sku, price, description, stock, product_created_at) VALUES(?,?,?,?,?,?)";
+
+      PreparedStatement preparedStatement = dbCon.getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+      preparedStatement.setString(1, product.getName());
+      preparedStatement.setString(2, product.getSku());
+      preparedStatement.setFloat(3, product.getPrice());
+      preparedStatement.setString(4, product.getDescription());
+      preparedStatement.setLong(5, product.getStock());
+      preparedStatement.setLong(6, product.getCreatedTime());
+
+      int rowsAffected = preparedStatement.executeUpdate();
+
+      // Get our key back in order to apply it to an object as ID
+      ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
+      if (generatedKeys.next()&&rowsAffected==1) {
+        product.setId(generatedKeys.getInt(1));
+        return product;
+
+      } else {
+        // Return null if product has not been inserted into database
+        return null;
+      }
+    }catch (SQLException e){
+      e.printStackTrace();
+    } finally {
+      try {
+        dbCon.getConnection().close();
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
     }
-
-    // Insert the product in the DB
-    int productID = dbCon.insert(
-        "INSERT INTO product(product_name, sku, price, description, stock, product_created_at) VALUES('"
-            + product.getName()
-            + "', '"
-            + product.getSku()
-            + "', '"
-            + product.getPrice()
-            + "', '"
-            + product.getDescription()
-            + "', '"
-            + product.getStock()
-            + "', '"
-            + product.getCreatedTime()
-            + "')");
-
-    if (productID != 0) {
-      //Update the productid of the product before returning
-      product.setId(productID);
-    } else{
-      // Return null if product has not been inserted into database
-      return null;
-    }
-
     // Return product
     return product;
   }

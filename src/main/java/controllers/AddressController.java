@@ -1,7 +1,10 @@
 package controllers;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+
 import model.Address;
 import utils.Log;
 
@@ -15,36 +18,40 @@ public class AddressController {
 
   public static Address createAddress(Address address) {
 
-    // Skriver i log at vi er her
-    Log.writeLog(ProductController.class.getName(), address, "Actually creating a line item in DB", 0);
 
-    // Checker forbindelse til DB
-    if (dbCon == null) {
-      dbCon = new DatabaseController();
+    // Write in log that we've reach this step
+    Log.writeLog(ProductController.class.getName(), address, "Actually creating an address in DB", 0);
+
+    try {
+      // Check for DB Connection
+      if (dbCon == null) {
+        dbCon = new DatabaseController();
+      }
+
+      //Building SQL statement and executing query
+      String sql = "INSERT INTO address(name, city, zipcode, street_address) VALUES(?,?,?,?)";
+
+      PreparedStatement preparedStatement = dbCon.getConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+      preparedStatement.setString(1, address.getName());
+      preparedStatement.setString(2, address.getCity());
+      preparedStatement.setString(3, address.getZipCode());
+      preparedStatement.setString(4, address.getStreetAddress());
+
+      int rowsAffected = preparedStatement.executeUpdate();
+
+      // Get our key back in order to apply it to an object as ID
+      ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
+      if (generatedKeys.next()&&rowsAffected==1) {
+        address.setId(generatedKeys.getInt(1));
+        return address;
+      }
+
+    } catch (SQLException e){
+      e.printStackTrace();
     }
-
-    // Indsætter produktet i DB
-    int addressID = dbCon.insert(
-        "INSERT INTO address(name, city, zipcode, street_address) VALUES('"
-            + address.getName()
-            + "', '"
-            + address.getCity()
-            + "', '"
-            + address.getZipCode()
-            + "', '"
-            + address.getStreetAddress()
-            + "')");
-
-    if (addressID != 0) {
-      //Update the productid of the product before returning
-      address.setId(addressID);
-    } else{
-      // Return null if product has not been inserted into database
-      return null;
-    }
-
-    // Return product, will be null at this point
+    // Return null if address has not been inserted into database
     return address;
+
   }
 
   //createbillingadress deklarere og instantiere et adresse objekt baseret på information fra resultsettet
